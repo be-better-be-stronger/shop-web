@@ -1,21 +1,21 @@
 # 📦 Shop Web – Angular Frontend
 
-Frontend SPA cho hệ thống bán hàng, xây dựng bằng **Angular** và giao tiếp với **Spring Boot REST API** thông qua JWT Authentication.
+A Single Page Application (SPA) frontend for an e-commerce system, built with **Angular** and integrated with a **Spring Boot REST API** using **JWT Authentication**.
 
 ---
 
-## 🧠 Tổng quan
-- **shop-web** là frontend của hệ thống e-commerce
-- Kiến trúc **SPA (Single Page Application)**
-- Phân quyền **USER / ADMIN**
-- Giao tiếp backend qua REST API (`shop-api`)
-- Áp dụng cấu trúc project **theo chuẩn enterprise**
+## 🧠 Overview
+- **shop-web** is the frontend application of an e-commerce system
+- SPA architecture (Single Page Application)
+- Role-based access control: **USER / ADMIN**
+- Communicates with backend via REST API (`shop-api`)
+- Designed following **enterprise-level project structure and best practices**
 
 ---
 
-## 🛠️ Công nghệ sử dụng
+## 🛠️ Tech Stack
 - **Angular 21.1.0**
-- TypeScript (strict mode)
+- TypeScript (strict mode enabled)
 - Angular Router
 - Reactive Forms
 - HttpClient + Interceptors
@@ -25,23 +25,23 @@ Frontend SPA cho hệ thống bán hàng, xây dựng bằng **Angular** và gia
 
 ---
 
-## 🧱 Cấu trúc thư mục
+## 🧱 Project Structure
 ```text
 src/app
 ├─ core/
-│  ├─ auth/            # AuthService, token handling
+│  ├─ auth/            # Authentication services & token handling
 │  ├─ guards/          # AuthGuard, RoleGuard
-│  ├─ interceptors/    # JWT interceptor, error handling
-│  └─ services/        # Global services
+│  ├─ interceptors/    # JWT & error interceptors
+│  └─ services/        # Global/core services
 │
 ├─ features/
 │  ├─ auth/            # Login, Register pages
-│  ├─ catalog/         # Product list, product detail
-│  ├─ cart/            # Cart & checkout
-│  └─ admin/           # Admin product/order management
+│  ├─ catalog/         # Product list & product detail
+│  ├─ cart/            # Shopping cart & checkout
+│  └─ admin/           # Admin product & order management
 │
 ├─ shared/
-│  ├─ models/          # Shared DTO / interfaces
+│  ├─ models/          # Shared DTOs / interfaces
 │  └─ components/      # Reusable UI components
 │
 ├─ app.routes.ts
@@ -51,45 +51,45 @@ src/app
 ---
 
 ## 🔐 Authentication & Authorization
-- Đăng nhập bằng **JWT**
-- Token được lưu trong `localStorage`
-- `HttpInterceptor` tự động gắn header:
+- JWT-based authentication
+- Access token stored in `localStorage`
+- `HttpInterceptor` automatically attaches:
 ```
 Authorization: Bearer <token>
 ```
-- Route được bảo vệ bằng:
-  - `AuthGuard`: yêu cầu đăng nhập
-  - `RoleGuard`: yêu cầu quyền ADMIN
-- Khi token hết hạn hoặc 401 → tự động redirect về `/login`
+- Route protection using:
+  - `AuthGuard`: requires authenticated user
+  - `RoleGuard`: restricts access to ADMIN-only routes
+- Automatically redirects to `/login` on token expiration or HTTP 401 responses
 
 ---
 
-## ✨ Chức năng chính
+## ✨ Key Features
 
-### 👤 User
-- Đăng ký / đăng nhập
-- Xem danh sách sản phẩm
-- Xem chi tiết sản phẩm
-- Thêm / cập nhật / xoá sản phẩm trong giỏ hàng
-- Checkout & tạo đơn hàng
-- Xem lịch sử đơn hàng
+### 👤 User Features
+- User registration & login
+- Browse product catalog
+- View product details
+- Add / update / remove items in cart
+- Checkout and place orders
+- View order history
 
-### 🛠️ Admin
-- Quản lý sản phẩm (CRUD)
-- Upload ảnh sản phẩm
-- Soft delete / active product
-- Quản lý đơn hàng
-- Phân quyền truy cập theo role
+### 🛠️ Admin Features
+- Product management (CRUD)
+- Product image upload
+- Soft delete / activate products
+- Order management
+- Role-based access control
 
 ---
 
-## 🔗 Kết nối Backend
+## 🔗 Backend Integration
 - Backend repository: **shop-api (Spring Boot)**
-- Base URL:
+- API Base URL:
 ```
 http://localhost:8080/api
 ```
-- Format response thống nhất:
+- Unified API response format:
 ```json
 {
   "success": true,
@@ -100,51 +100,51 @@ http://localhost:8080/api
 
 ---
 
-## 🧪 Xử lý trạng thái UI
-- Loading state cho mọi API call
-- Hiển thị error message từ backend
-- Empty state khi không có dữ liệu
-- Form validation (Reactive Forms)
+## 🧪 UI State Handling
+- Global loading states for API calls
+- Centralized error handling with user-friendly messages
+- Empty states for no-data scenarios
+- Reactive Forms with validation
 
 ---
 
-## ⚙️ Cài đặt & chạy project
+## ⚙️ Installation & Run
 
-### Yêu cầu
+### Prerequisites
 - Node.js >= 20.19
 - Angular CLI
 
-### Cài đặt
+### Install dependencies
 ```bash
 npm install
 ```
 
-### Chạy dev
+### Run development server
 ```bash
 ng serve
 ```
 
-Truy cập:
+Access the application at:
 ```
 http://localhost:4200
 ```
 
 ---
 
-## 🏗️ Build production
+## 🏗️ Production Build
 ```bash
 ng build -c production
 ```
 
 ---
 
-## 📌 Ghi chú
-- Project được thiết kế để học tập và thực hành kiến trúc **Angular + Spring Boot**
-- Áp dụng best practices: phân tầng, tách trách nhiệm, bảo mật JWT
-- Có thể mở rộng thêm mobile app hoặc SSR trong tương lai
+## 📌 Notes
+- This project is built for learning and practicing **Angular + Spring Boot** architecture
+- Follows best practices: layered structure, separation of concerns, JWT security
+- Easily extendable to mobile apps or SSR in the future
 
 ---
 
-## 👨‍💻 Tác giả
+## 👨‍💻 Author
 - **Đặng Quốc Thanh**
 - Java Web Fullstack Developer (Angular + Spring Boot)
