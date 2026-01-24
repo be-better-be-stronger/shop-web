@@ -1,0 +1,99 @@
+<div class="page">
+  <div class="card">
+    <h1>{{ editingProduct ? 'Update Product' : 'Create Product' }}</h1>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="field">
+        <label>Name</label>
+        <input formControlName="name" placeholder="Product name" />
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+          <small class="err">Name is required (max 100)</small>
+        }
+      </div>
+
+      <div class="field">
+        <label>Stock</label>
+        <input type="number" formControlName="stock" />
+        @if (form.controls.stock.touched && form.controls.stock.invalid) {
+          <small class="err">Stock must be &gt;= 1</small>
+        }
+      </div>
+
+      <div class="field">
+        <label>Price</label>
+        <input type="number" step="0.01" formControlName="price" />
+        @if (form.controls.price.touched && form.controls.price.invalid) {
+          <small class="err">Price must be &gt; 0</small>
+        }
+      </div>
+
+      <div class="field">
+        <label>Category</label>
+        <select formControlName="categoryId">
+          @for (c of categories(); track c.id) {
+            <option [ngValue]="c.id">{{ c.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field row">
+        <label class="rowlabel">
+          <input type="checkbox" formControlName="isActive" />
+          Active
+        </label>
+      </div>
+
+      <hr class="sep" />
+
+      <div class="field">
+        <label>Product Image</label>
+
+        <div class="uploader">
+          <input type="file" accept="image/*" (change)="onPickFile($event)" />
+
+          @if (previewUrl()) {
+            <div class="preview">
+              <img [src]="previewUrl()" alt="preview" />
+            </div>
+          } @else {
+            <div class="preview empty">No image</div>
+          }
+
+          <div class="meta">
+            @if (form.value.imageUrl) {
+              <div class="pill">imageUrl: {{ form.value.imageUrl }}</div>
+            }
+
+            @if (uploading()) {
+              <div class="progress">
+                Uploading... {{ uploadProgress() }}%
+                <div class="bar">
+                  <div class="barfill" [style.width.%]="uploadProgress()"></div>
+                </div>
+              </div>
+            }
+
+            <button
+              type="button"
+              class="ghost"
+              (click)="clearSelectedFile()"
+              [disabled]="uploading() || saving()"
+            >
+              Clear selected file
+            </button>
+          </div>
+        </div>
+      </div>
+
+      @if (error()) {
+        <p class="err">{{ error() }}</p>
+      }
+
+      <div class="actions">
+        <button type="submit" [disabled]="uploading() || saving()">
+          {{ saving() ? 'Saving...' : (editingProduct ? 'Update' : 'Create') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

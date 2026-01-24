@@ -1,0 +1,163 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.page {
+  min-height: calc(100vh - 40px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.card {
+  width: 100%;
+  max-width: 560px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 22px;
+  background: #fff;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: 22px;
+}
+
+.sub {
+  margin: 0 0 16px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.field {
+  margin-bottom: 12px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #374151;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  outline: none;
+  font-size: 14px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.rowlabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+}
+
+.sep {
+  border: 0;
+  border-top: 1px solid #eee;
+  margin: 16px 0;
+}
+
+.uploader {
+  display: grid;
+  gap: 10px;
+}
+
+.preview {
+  border: 1px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 10px;
+  display: grid;
+  place-items: center;
+  background: #fafafa;
+}
+
+.preview img {
+  max-width: 100%;
+  max-height: 240px;
+  border-radius: 10px;
+}
+
+.preview.empty {
+  color: #6b7280;
+  font-size: 13px;
+  height: 140px;
+}
+
+.meta {
+  display: grid;
+  gap: 10px;
+}
+
+.pill {
+  font-size: 12px;
+  color: #374151;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 6px 10px;
+  word-break: break-all;
+}
+
+.progress {
+  font-size: 12px;
+  color: #374151;
+}
+
+.bar {
+  height: 8px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.barfill {
+  height: 100%;
+  width: 0%;
+  background: #111827;
+}
+
+.err {
+  color: #b91c1c;
+  font-size: 13px;
+  margin: 8px 0 0;
+}
+
+.actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+button {
+  padding: 10px 14px;
+  border: 1px solid #111827;
+  border-radius: 10px;
+  background: #111827;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ghost {
+  background: transparent;
+  color: #111827;
+}
