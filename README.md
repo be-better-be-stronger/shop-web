@@ -1,59 +1,150 @@
-# ShopWeb
+# 📦 Shop Web – Angular Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.0.
+Frontend SPA cho hệ thống bán hàng, xây dựng bằng **Angular** và giao tiếp với **Spring Boot REST API** thông qua JWT Authentication.
 
-## Development server
+---
 
-To start a local development server, run:
+## 🧠 Tổng quan
+- **shop-web** là frontend của hệ thống e-commerce
+- Kiến trúc **SPA (Single Page Application)**
+- Phân quyền **USER / ADMIN**
+- Giao tiếp backend qua REST API (`shop-api`)
+- Áp dụng cấu trúc project **theo chuẩn enterprise**
 
+---
+
+## 🛠️ Công nghệ sử dụng
+- **Angular 21.1.0**
+- TypeScript (strict mode)
+- Angular Router
+- Reactive Forms
+- HttpClient + Interceptors
+- JWT Authentication
+- SCSS
+- Node.js 20+
+
+---
+
+## 🧱 Cấu trúc thư mục
+```text
+src/app
+├─ core/
+│  ├─ auth/            # AuthService, token handling
+│  ├─ guards/          # AuthGuard, RoleGuard
+│  ├─ interceptors/    # JWT interceptor, error handling
+│  └─ services/        # Global services
+│
+├─ features/
+│  ├─ auth/            # Login, Register pages
+│  ├─ catalog/         # Product list, product detail
+│  ├─ cart/            # Cart & checkout
+│  └─ admin/           # Admin product/order management
+│
+├─ shared/
+│  ├─ models/          # Shared DTO / interfaces
+│  └─ components/      # Reusable UI components
+│
+├─ app.routes.ts
+└─ app.config.ts
+```
+
+---
+
+## 🔐 Authentication & Authorization
+- Đăng nhập bằng **JWT**
+- Token được lưu trong `localStorage`
+- `HttpInterceptor` tự động gắn header:
+```
+Authorization: Bearer <token>
+```
+- Route được bảo vệ bằng:
+  - `AuthGuard`: yêu cầu đăng nhập
+  - `RoleGuard`: yêu cầu quyền ADMIN
+- Khi token hết hạn hoặc 401 → tự động redirect về `/login`
+
+---
+
+## ✨ Chức năng chính
+
+### 👤 User
+- Đăng ký / đăng nhập
+- Xem danh sách sản phẩm
+- Xem chi tiết sản phẩm
+- Thêm / cập nhật / xoá sản phẩm trong giỏ hàng
+- Checkout & tạo đơn hàng
+- Xem lịch sử đơn hàng
+
+### 🛠️ Admin
+- Quản lý sản phẩm (CRUD)
+- Upload ảnh sản phẩm
+- Soft delete / active product
+- Quản lý đơn hàng
+- Phân quyền truy cập theo role
+
+---
+
+## 🔗 Kết nối Backend
+- Backend repository: **shop-api (Spring Boot)**
+- Base URL:
+```
+http://localhost:8080/api
+```
+- Format response thống nhất:
+```json
+{
+  "success": true,
+  "message": "OK",
+  "data": {}
+}
+```
+
+---
+
+## 🧪 Xử lý trạng thái UI
+- Loading state cho mọi API call
+- Hiển thị error message từ backend
+- Empty state khi không có dữ liệu
+- Form validation (Reactive Forms)
+
+---
+
+## ⚙️ Cài đặt & chạy project
+
+### Yêu cầu
+- Node.js >= 20.19
+- Angular CLI
+
+### Cài đặt
+```bash
+npm install
+```
+
+### Chạy dev
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+Truy cập:
+```
+http://localhost:4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+---
 
+## 🏗️ Build production
 ```bash
-ng generate --help
+ng build -c production
 ```
 
-## Building
+---
 
-To build the project run:
+## 📌 Ghi chú
+- Project được thiết kế để học tập và thực hành kiến trúc **Angular + Spring Boot**
+- Áp dụng best practices: phân tầng, tách trách nhiệm, bảo mật JWT
+- Có thể mở rộng thêm mobile app hoặc SSR trong tương lai
 
-```bash
-ng build
-```
+---
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## 👨‍💻 Tác giả
+- **Đặng Quốc Thanh**
+- Java Web Fullstack Developer (Angular + Spring Boot)
