@@ -16,9 +16,6 @@ export interface UpsertProductRequest {
   categoryId: number;
   isActive?: boolean | null;
   imageUrl?: string | null;
+  description: string | null;
 }
 
-export interface CategoryResponse {
-  id: number;
-  name: string;
-}
