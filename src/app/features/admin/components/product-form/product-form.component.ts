@@ -1,206 +1,189 @@
-import { Component, Input, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CategoryResponse, ProductResponse, UpsertProductRequest } from '../../../../core/models/product';
-import { AdminProductService } from '../../services/admin-product.service';
-import { CategoryService } from '../../../../core/services/category/category.services';
 
-type UpsertProductFormControls = {
-  name: FormControl<string>;
-  stock: FormControl<number>;
-  price: FormControl<number>;
-  categoryId: FormControl<number>;
-  isActive: FormControl<boolean>;
-  imageUrl: FormControl<string | null>;
-};
+import { Component, inject, Input, OnChanges, signal, SimpleChanges } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { AdminProductService } from '../../services/admin-product.service';
+import { UpsertProductRequest, ProductResponse } from '../../../../core/models/product';
+import { CatalogApiService } from '../../../../core/services/catalog-api.service';
+import { Category } from '../../../../core/models/category';
 
 @Component({
   selector: 'app-admin-product-form',
   standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './product-form.component.html',
-  styleUrl: './product-form.component.css',
 })
-export class AdminProductFormComponent implements OnInit {
-  /** Nếu edit: truyền product vào từ parent */
-  @Input() editingProduct: ProductResponse | null = null;
+export class AdminProductFormComponent implements OnChanges {
 
-  categories = signal<CategoryResponse[]>([]);
-  saving = signal(false);
+  private fb = inject(FormBuilder);
+  private productService = inject(AdminProductService);
+  private catalogService = inject(CatalogApiService);
+
+  /** nếu id có giá trị => edit mode, nếu null => create mode */
+  @Input() productId: number | null = null;
+
+  /** nếu edit mode, truyền product detail vào để patch form (có thể lấy từ API detail) */
+  @Input() product: ProductResponse | null = null;
+
   uploading = signal(false);
-  uploadProgress = signal<number>(0);
-  error = signal<string | null>(null);
+  saving = signal(false);
 
-  selectedFile: File | null = null;
-  previewUrl = signal<string | null>(null);
+  // lưu url trả từ backend
+  imageUrl: string | null = null;
 
-  form!: FormGroup<UpsertProductFormControls>;
+  // preview ảnh trên UI (local hoặc public)
+previewUrl = signal<string | null>(null);
 
+  msg: string | null = null;
+  err: string | null = null;
 
-  constructor(private fb: FormBuilder,
-    private adminProduct: AdminProductService,
-    private categoryService: CategoryService) {
-      this.form = this.fb.nonNullable.group({
-        name: this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(100)]),
-        stock: this.fb.nonNullable.control(1, [Validators.required, Validators.min(1)]),
-        price: this.fb.nonNullable.control(1, [Validators.required, Validators.min(0.01)]),
-        categoryId: this.fb.nonNullable.control(1, [Validators.required, Validators.min(1)]),
-        isActive: this.fb.control<boolean>(true),
-        imageUrl: this.fb.control<string | null>(null), // option backend url
-      }) as FormGroup<UpsertProductFormControls>;
-
+  // demo categories (sau này mày thay bằng API categories)
+  categories: Category[] = [];
+  ngOnInit() {
+    this.catalogService.getCategories().subscribe({
+      next: (data) => {
+        this.categories = data;
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
   }
 
-  ngOnInit(): void {
-    this.loadCategories();
-    if (this.editingProduct) {
-      const p = this.editingProduct;
+  form = this.fb.group({
+    name: ['', [Validators.required, Validators.maxLength(100)]],
+    description: ['', [Validators.maxLength(500)]],
+    stock: [1, [Validators.required, Validators.min(1)]],
+    price: [1, [Validators.required, Validators.min(0.01)]],
+    categoryId: [1, [Validators.required, Validators.min(1)]],
+    isActive: [true],
+  });
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Khi nhận product detail (edit) => patch form
+    if (changes['product'] && this.product) {
+      // ProductResponse của mày có thể khác, tự map field cho khớp
+      // giả sử ProductResponse có các field giống entity/DTO:
       this.form.patchValue({
-        name: p.name,
-        stock: p.stock,
-        price: p.price,
-        categoryId: p.categoryId,
-        isActive: p.isActive,
-        imageUrl: p.imageUrl ?? null,
+        name: (this.product as any).name ?? '',
+        description: (this.product as any).description ?? '',
+        stock: (this.product as any).stock ?? 1,
+        price: (this.product as any).price ?? 1,
+        categoryId: (this.product as any).categoryId ?? 1,
+        isActive: (this.product as any).isActive ?? true,
       });
 
-      // preview: nếu có imageUrl thì show luôn
-      this.previewUrl.set(p.imageUrl ?? null);
-    } else {
-      this.previewUrl.set(this.form.value.imageUrl ?? null);
+      const url = (this.product as any).imageUrl as string | undefined;
+      this.imageUrl = url ?? null;
+      this.previewUrl.set(url ?? null);
     }
   }
 
-  private loadCategories(): void {
-    this.categoryService.getAll().subscribe({
-      next: (data) => {
-        this.categories.set(data);
+  onPickImage(ev: Event) {
+    this.msg = null;
+    this.err = null;
+
+    const input = ev.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    // preview local ngay lập tức
+    this.previewUrl.set(URL.createObjectURL(file));
+
+    // upload để lấy public url
+    this.uploading.set(true);
+    this.productService.uploadImage(file).subscribe({
+      next: (url) => {
+        this.imageUrl = url;     // "/uploads/products/uuid.jpg"
+        this.previewUrl.set(`http://localhost:8080${url}`);   // cho preview bằng public url (nếu muốn)
+        this.uploading.set(false);
+        this.msg = 'Upload image ok';
       },
-      error: (err) => {
-        console.error('Load categories failed', err);
+      error: (e) => {
+        this.uploading.set(false);
+        this.err = this.pickErr(e) ?? 'Upload failed';
+        this.imageUrl = null;
       },
     });
   }
 
-  onPickFile(ev: Event): void {
-    const input = ev.target as HTMLInputElement;
-    const file = input.files?.[0] ?? null;
-
-    this.selectedFile = file;
-    this.error.set(null);
-
-    if (!file) {
-      this.previewUrl.set(this.form.value.imageUrl ?? null);
-      return;
-    }
-
-    // client preview
-    const reader = new FileReader();
-    reader.onload = () => (this.previewUrl.set(typeof reader.result === 'string' ? reader.result : null));
-    reader.readAsDataURL(file);
-  }
-
-  clearSelectedFile(): void {
-    this.selectedFile = null;
-    this.previewUrl.set(this.form.value.imageUrl ?? null);
-    this.uploadProgress.set(0);
-    this.error.set(null);
-  }
-
-  submit(): void {
-    this.error.set(null);
+  submit() {
+    this.msg = null;
+    this.err = null;
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.error.set('Form invalid. Check fields.');
+      this.err = 'Form invalid';
       return;
     }
 
-    // Option B: nếu có file mới -> upload trước
-    if (this.selectedFile) {
-      this.uploadThenSave(this.selectedFile);
-      return;
-    }
+    const v = this.form.getRawValue();
 
-    // không upload -> save luôn (giữ imageUrl hiện tại hoặc null)
-    this.saveProduct();
-  }
+    const req: UpsertProductRequest = {
+      name: v.name!,
+      stock: Number(v.stock),
+      price: Number(v.price),
+      categoryId: Number(v.categoryId),
+      isActive: !!v.isActive,
+      imageUrl: this.imageUrl ?? undefined,
+      description: v.description ?? null,
+    };
 
-  private uploadThenSave(file: File): void {
-    this.uploading.set(true);
-    this.uploadProgress.set(0);
+    this.saving.set(true);
 
-    this.adminProduct.uploadImageWithProgress(file).subscribe({
-      next: (state) => {
-        this.uploadProgress.set(state.progress);
+    const obs = this.productId
+      ? this.productService.update(this.productId, req)
+      : this.productService.create(req);
 
-        if (state.url) {
-          // set imageUrl vào form rồi save
-          this.form.patchValue({ imageUrl: state.url });
-          this.selectedFile = null; // file đã lên xong
-          this.uploading.set(false);
-          this.saveProduct();
+    obs.subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.msg = this.productId ? 'Updated product ok' : 'Created product ok';
+
+        if (!this.productId) {
+          // create xong thì reset nhẹ
+          this.form.reset({
+            name: '',
+            description: '',
+            stock: 1,
+            price: 1,
+            categoryId: 1,
+            isActive: true,
+          });
+          this.imageUrl = null;
+          this.previewUrl.set(null);
         }
       },
-      error: (err: unknown) => {
-        this.uploading.set(false);
-        this.error.set(this.extractErr(err) ?? 'Upload failed');
+      error: (e) => {
+        this.saving.set(false);
+        this.err = this.pickErr(e) ?? 'Save failed';
       },
     });
   }
 
-  private saveProduct(): void {
+  disable() {
+    if (!this.productId) return;
+
+    this.msg = null;
+    this.err = null;
     this.saving.set(true);
 
-    const raw = this.form.getRawValue();
-    const req: UpsertProductRequest = {
-      name: raw.name,
-      stock: raw.stock,
-      price: raw.price,
-      categoryId: raw.categoryId,
-      isActive: raw.isActive ?? true,
-      imageUrl: raw.imageUrl ?? null,
-    };
-
-    const done = () => this.saving.set(false);
-
-    if (this.editingProduct) {
-      this.adminProduct.update(this.editingProduct.id, req).subscribe({
-        next: (p) => {
-          done();
-          this.previewUrl.set(p.imageUrl ?? null);
-          this.form.patchValue({ imageUrl: p.imageUrl ?? null });
-        },
-        error: (err: unknown) => {
-          done();
-          this.error.set(this.extractErr(err) ?? 'Update failed');
-        },
-      });
-    } else {
-      this.adminProduct.create(req).subscribe({
-        next: (p) => {
-          done();
-          this.previewUrl.set(p.imageUrl ?? null);
-          this.form.patchValue({ imageUrl: p.imageUrl ?? null });
-        },
-        error: (err: unknown) => {
-          done();
-          this.error.set(this.extractErr(err) ?? 'Create failed');
-        },
-      });
-    }
+    this.productService.disable(this.productId).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.msg = 'Disabled product ok';
+        this.form.patchValue({ isActive: false });
+      },
+      error: (e) => {
+        this.saving.set(false);
+        this.err = this.pickErr(e) ?? 'Disable failed';
+      },
+    });
   }
 
-  private extractErr(err: unknown): string | null {
-    // strict-safe error parsing
-    if (typeof err === 'string') return err;
-    if (err && typeof err === 'object' && 'error' in err) {
-      const e = (err as { error?: unknown }).error;
-      if (typeof e === 'string') return e;
-      if (e && typeof e === 'object' && 'message' in e) {
-        const msg = (e as { message?: unknown }).message;
-        if (typeof msg === 'string') return msg;
-      }
-    }
-    return null;
+
+
+  private pickErr(e: any): string | null {
+    // tùy format ApiResponse / exception của mày
+    return e?.error?.message ?? e?.error?.error ?? null;
   }
 }
