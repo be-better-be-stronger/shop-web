@@ -1,0 +1,168 @@
+<!-- admin-product-list-page.component.html -->
+
+<section class="page">
+  <header class="toolbar">
+    <h1>Products</h1>
+
+    <div class="toolbar__actions">
+      <button type="button" (click)="goCreate()">+ New product</button>
+    </div>
+  </header>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filters__row">
+      <label class="field">
+        <span class="field__label">Search</span>
+        <input
+          type="text"
+          placeholder="name / sku..."
+          [(ngModel)]="kwModel"
+          (keydown.enter)="applyKeyword()"
+        />
+      </label>
+
+      <button type="button" (click)="applyKeyword()">Search</button>
+      <button type="button" (click)="clearKeyword()">Clear</button>
+    </div>
+
+    <div class="filters__row">
+      <label class="field">
+        <span class="field__label">Status</span>
+        <select
+          [value]="statusFilter()"
+          (change)="onChangeStatus(($any($event.target).value))"
+        >
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="disabled">Disabled</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Category Id</span>
+        <input
+          type="number"
+          placeholder="(blank = all)"
+          [value]="catId() ?? ''"
+          (change)="onChangeCategory(parseCat($any($event.target).value))"
+        />
+      </label>
+
+      <div class="sort">
+        <span class="sort__label">Sort:</span>
+
+        <button type="button" (click)="onChangeSort('name')">
+          Name
+          @if (sortBy() === 'name') {
+            <span>({{ sortDir() }})</span>
+          }
+        </button>
+
+        <button type="button" (click)="onChangeSort('price')">
+          Price
+          @if (sortBy() === 'price') {
+            <span>({{ sortDir() }})</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  @if (err()) {
+    <p class="error">{{ err() }}</p>
+  }
+
+  <!-- Loading -->
+  @if (loading()) {
+    <p>Loading…</p>
+  } @else {
+    <!-- Table -->
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width: 80px;">ID</th>
+            <th>Name</th>
+            <th style="width: 120px;">SKU</th>
+            <th style="width: 110px;">Price</th>
+            <th style="width: 90px;">Stock</th>
+            <th style="width: 110px;">Active</th>
+            <th style="width: 200px;">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @if (items().length === 0) {
+            <tr>
+              <td colspan="7">No products.</td>
+            </tr>
+          } @else {
+            @for (p of items(); track ($any(p).id ?? $index)) {
+              <tr>
+                <td>{{ $any(p).id }}</td>
+                <td>
+                  <div class="name">
+                    <div class="name__main">{{ $any(p).name }}</div>
+                    @if ($any(p).categoryName) {
+                      <div class="name__sub">Category: {{ $any(p).categoryName }}</div>
+                    }
+                  </div>
+                </td>
+                <td>{{ $any(p).sku ?? '-' }}</td>
+                <td>{{ $any(p).price ?? '-' }}</td>
+                <td>{{ $any(p).stock ?? '-' }}</td>
+                <td>
+                  @if ($any(p).isActive) {
+                    <span>Yes</span>
+                  } @else {
+                    <span>No</span>
+                  }
+                </td>
+                <td>
+                  <button type="button" (click)="goEdit($any(p).id)">Edit</button>
+
+                  <button
+                    type="button"
+                    [disabled]="busyId() === $any(p).id"
+                    (click)="toggleActive(p)"
+                  >
+                    @if (busyId() === $any(p).id) {
+                      Saving…
+                    } @else {
+                      @if ($any(p).isActive) {
+                        Disable
+                      } @else {
+                        Enable
+                      }
+                    }
+                  </button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paging -->
+    <footer class="paging">
+      <div class="paging__info">
+        <span>Page {{ page() }} / {{ totalPages() || 1 }}</span>
+        <span>• Total: {{ totalElements() }}</span>
+      </div>
+
+      <div class="paging__actions">
+        <button type="button" (click)="prev()" [disabled]="page() <= 1">Prev</button>
+        <button
+          type="button"
+          (click)="next()"
+          [disabled]="totalPages() > 0 && page() >= totalPages()"
+        >
+          Next
+        </button>
+      </div>
+    </footer>
+  }
+</section>
