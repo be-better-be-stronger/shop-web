@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { Category } from '../models/category';
 import { ApiResponse } from '../models/api-response';
-import { ProductResponse } from '../models/product';
+import { ProductResponse, UpsertProductRequest } from '../models/product';
 import { Page } from '../models/page.model';
 import { environment } from '../../../environments/environment';
 
@@ -53,4 +53,10 @@ export class CatalogApiService {
       params: httpParams,
     }).pipe(map(response => response.data));
   }
+
+  getProductById(id: number): Observable<ProductResponse> {
+    return this.http.get<ProductResponse>(`${this.baseUrl}/products/${id}`);
+  }
+
+ 
 }
