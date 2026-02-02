@@ -1,4 +1,4 @@
-<div class="container py-3" style="max-width: 960px;">
+<div class="container py-3" style="max-width: 960px">
   <h4 class="mb-3">
     {{ productId ? 'Edit Product' : 'Create Product' }}
   </h4>
@@ -17,20 +17,23 @@
       <div class="card">
         <div class="card-header">Image</div>
         <div class="card-body">
-
           @if (previewUrl()) {
             <img [src]="previewUrl()" class="img-fluid rounded mb-2" />
           } @else {
-            <div class="border bg-light d-flex align-items-center justify-content-center mb-2"
-                 style="height: 240px;">
+            <div
+              class="border bg-light d-flex align-items-center justify-content-center mb-2"
+              style="height: 240px"
+            >
               <span class="text-muted small">No image</span>
             </div>
           }
 
-          <input type="file"
-                 class="form-control"
-                 accept="image/jpeg,image/png,image/webp"
-                 (change)="onPickImage($event)">
+          <input
+            type="file"
+            class="form-control"
+            accept="image/jpeg,image/png,image/webp"
+            (change)="onPickImage($event)"
+          />
 
           <div class="small mt-2">
             @if (uploading()) {
@@ -39,7 +42,6 @@
               <span class="text-success">Uploaded</span>
             }
           </div>
-
         </div>
       </div>
     </div>
@@ -47,14 +49,14 @@
     <!-- FORM -->
     <div class="col-12 col-lg-8">
       <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-
         <!-- NAME -->
         <div class="mb-3">
           <label class="form-label">Name *</label>
           <input
             class="form-control"
             formControlName="name"
-            [class.is-invalid]="form.controls.name.touched && form.controls.name.invalid">
+            [class.is-invalid]="form.controls.name.touched && form.controls.name.invalid"
+          />
 
           @if (form.controls.name.touched && form.controls.name.hasError('required')) {
             <div class="invalid-feedback">Name is required</div>
@@ -71,10 +73,14 @@
             rows="3"
             class="form-control"
             formControlName="description"
-            [class.is-invalid]="form.controls.description.touched && form.controls.description.invalid"></textarea>
+            [class.is-invalid]="
+              form.controls.description.touched && form.controls.description.invalid
+            "
+          ></textarea>
 
-          @if (form.controls.description.touched
-                && form.controls.description.hasError('maxlength')) {
+          @if (
+            form.controls.description.touched && form.controls.description.hasError('maxlength')
+          ) {
             <div class="invalid-feedback">Max 500 characters</div>
           }
         </div>
@@ -87,7 +93,8 @@
               type="number"
               class="form-control"
               formControlName="stock"
-              [class.is-invalid]="form.controls.stock.touched && form.controls.stock.invalid">
+              [class.is-invalid]="form.controls.stock.touched && form.controls.stock.invalid"
+            />
 
             @if (form.controls.stock.touched && form.controls.stock.hasError('required')) {
               <div class="invalid-feedback">Stock is required</div>
@@ -105,7 +112,8 @@
               step="0.01"
               class="form-control"
               formControlName="price"
-              [class.is-invalid]="form.controls.price.touched && form.controls.price.invalid">
+              [class.is-invalid]="form.controls.price.touched && form.controls.price.invalid"
+            />
 
             @if (form.controls.price.touched && form.controls.price.hasError('required')) {
               <div class="invalid-feedback">Price is required</div>
@@ -119,51 +127,49 @@
         <!-- CATEGORY -->
         <div class="mb-3 mt-3">
           <label class="form-label">Category *</label>
-          <select
-            class="form-select"
-            formControlName="categoryId"
-            [class.is-invalid]="form.controls.categoryId.touched && form.controls.categoryId.invalid">
-
+          <select class="form-select" formControlName="categoryId"
+            [class.is-invalid]="
+              form.controls.categoryId.touched && form.controls.categoryId.invalid
+            "
+          >
             @for (c of categories; track c.id) {
               <option [value]="c.id">{{ c.name }}</option>
             }
           </select>
 
-          @if (form.controls.categoryId.touched
-                && form.controls.categoryId.hasError('required')) {
+          @if (form.controls.categoryId.touched && form.controls.categoryId.hasError('required')) {
             <div class="invalid-feedback">Category is required</div>
           }
         </div>
 
         <!-- ACTIVE -->
         <div class="form-check form-switch mb-3">
-          <input class="form-check-input"
-                 type="checkbox"
-                 id="isActive"
-                 formControlName="isActive">
-          <label class="form-check-label" for="isActive">
-            Active
-          </label>
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="isActive"
+            formControlName="isActive"
+          />
+          <label class="form-check-label" for="isActive"> Active </label>
         </div>
 
         <!-- ACTIONS -->
         <div class="d-flex gap-2">
-          <button class="btn btn-primary"
-                  type="submit"
-                  [disabled]="saving() || uploading()">
+          <button class="btn btn-primary" type="submit" [disabled]="saving() || uploading()">
             {{ productId ? 'Update' : 'Create' }}
           </button>
 
           @if (productId) {
-            <button type="button"
-                    class="btn btn-outline-danger"
-                    (click)="disable()"
-                    [disabled]="saving()">
+            <button
+              type="button"
+              class="btn btn-outline-danger"
+              (click)="disable()"
+              [disabled]="saving()"
+            >
               Disable
             </button>
           }
         </div>
-
       </form>
     </div>
   </div>
