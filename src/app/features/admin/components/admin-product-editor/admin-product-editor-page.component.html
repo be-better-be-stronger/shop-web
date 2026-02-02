@@ -1,0 +1,5 @@
+<h2>{{ isEditMode() ? 'Edit product' : 'Create product' }}</h2>
+
+<app-admin-product-form 
+[productId]="productId()" [product]="product()"> 
+</app-admin-product-form>
